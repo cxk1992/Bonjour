@@ -12,6 +12,8 @@
 		8F392B641D633EDF00EC6E98 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 8F392B621D633EDF00EC6E98 /* Main.storyboard */; };
 		8F392B661D633EDF00EC6E98 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 8F392B651D633EDF00EC6E98 /* Assets.xcassets */; };
 		8F392B691D633EDF00EC6E98 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 8F392B671D633EDF00EC6E98 /* LaunchScreen.storyboard */; };
+		8F392B711D6351E100EC6E98 /* MenuTableViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8F392B701D6351E100EC6E98 /* MenuTableViewController.swift */; };
+		8F392B731D63CCFA00EC6E98 /* NetManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8F392B721D63CCFA00EC6E98 /* NetManager.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -22,6 +24,8 @@
 		8F392B651D633EDF00EC6E98 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		8F392B681D633EDF00EC6E98 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		8F392B6A1D633EDF00EC6E98 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		8F392B701D6351E100EC6E98 /* MenuTableViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MenuTableViewController.swift; sourceTree = "<group>"; };
+		8F392B721D63CCFA00EC6E98 /* NetManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = NetManager.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -55,7 +59,9 @@
 			isa = PBXGroup;
 			children = (
 				8F392B5E1D633EDF00EC6E98 /* AppDelegate.swift */,
+				8F392B701D6351E100EC6E98 /* MenuTableViewController.swift */,
 				8F392B601D633EDF00EC6E98 /* ViewController.swift */,
+				8F392B721D63CCFA00EC6E98 /* NetManager.swift */,
 				8F392B621D633EDF00EC6E98 /* Main.storyboard */,
 				8F392B651D633EDF00EC6E98 /* Assets.xcassets */,
 				8F392B671D633EDF00EC6E98 /* LaunchScreen.storyboard */,
@@ -138,7 +144,9 @@
 			buildActionMask = 2147483647;
 			files = (
 				8F392B611D633EDF00EC6E98 /* ViewController.swift in Sources */,
+				8F392B731D63CCFA00EC6E98 /* NetManager.swift in Sources */,
 				8F392B5F1D633EDF00EC6E98 /* AppDelegate.swift in Sources */,
+				8F392B711D6351E100EC6E98 /* MenuTableViewController.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -302,6 +310,7 @@
 				8F392B6F1D633EDF00EC6E98 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
 	};
