@@ -14,7 +14,10 @@ class ViewController: UIViewController , UITextFieldDelegate {
         didSet{
             handler?.dataReceiveClouser = { (data:Data ,handler:ConnectHandler) in
                 let message = String(data: data, encoding: String.Encoding.utf8)
-                self.dataSource.append(message!)
+                let messageh = Message()
+                messageh.type = .fromOther
+                messageh.message = message
+                self.dataSource.append(messageh)
                 self.tableView.reloadData()
             }
             self.dataSource = (handler?.messages)!
@@ -28,7 +31,7 @@ class ViewController: UIViewController , UITextFieldDelegate {
         }
     }
     
-    var dataSource : [String] = []
+    var dataSource : [Message] = []
     
     let tableView = UITableView(frame: CGRect(), style: .plain)
     
@@ -55,7 +58,7 @@ class ViewController: UIViewController , UITextFieldDelegate {
         tableView.autoresizingMask = [.flexibleWidth,.flexibleHeight]
         
         textField.frame = CGRect(x: 0, y: view.bounds.size.height - 50, width: view.bounds.size.width, height: 30)
-        textField.autoresizingMask = [.flexibleWidth,.flexibleHeight]
+        textField.autoresizingMask = [.flexibleTopMargin,.flexibleWidth]
         textField.delegate = self
         textField.borderStyle = .roundedRect
         view.addSubview(textField)
@@ -63,11 +66,17 @@ class ViewController: UIViewController , UITextFieldDelegate {
     }
     
     func textFieldShouldReturn(_ textField: UITextField) -> Bool {
-        handler?.send(data: (textField.text?.data(using: .utf8))!)
-        self.dataSource.append(textField.text!)
-        self.tableView.reloadData()
-        
-        textField.text = ""
+    
+        if textField.text?.characters.count != 0{
+            handler?.send(data: (textField.text?.data(using: .utf8))!)
+            
+            let message = Message()
+            message.message = textField.text
+            self.dataSource.append(message)
+            self.tableView.reloadData()
+            
+            textField.text = ""
+        }
         textField.resignFirstResponder()
         
         return true
@@ -101,9 +110,17 @@ extension ViewController : UITableViewDelegate , UITableViewDataSource{
         var cell = tableView.dequeueReusableCell(withIdentifier: "cell")
         if cell == nil {
             cell = UITableViewCell(style: .value1, reuseIdentifier: "cell")
+            cell?.detailTextLabel?.textColor = .black
+            cell?.textLabel?.textColor = .black
+        }
+        let message = dataSource[indexPath.row]
+        
+        if message.type == .fromOther {
+            cell?.textLabel?.text = message.message
+        }else{
+            cell?.detailTextLabel?.text = message.message
         }
         
-        cell?.textLabel?.text = dataSource[indexPath.row]
         
         return cell!
     }

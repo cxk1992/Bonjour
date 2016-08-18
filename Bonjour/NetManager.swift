@@ -12,6 +12,18 @@ enum BonjourType : String {
     case bonjour,service ,client
 }
 
+enum MessageFrom {
+    case fromMe , fromOther
+}
+
+class Message{
+    var type : MessageFrom = .fromMe
+    var message:String?
+    var data : Data?
+    var dataType:String?
+    
+}
+
 class ConnectHandler: NSObject ,StreamDelegate{
     
     var type : BonjourType = .bonjour
@@ -24,7 +36,7 @@ class ConnectHandler: NSObject ,StreamDelegate{
     
     var hasNewMessage : Bool = false
     
-    var messages : [String] = []
+    var messages : [Message] = []
     
     override init() {
         super.init()
@@ -81,7 +93,11 @@ class ConnectHandler: NSObject ,StreamDelegate{
         if self.output!.hasSpaceAvailable{
             var bytes : [UInt8] = Array(repeating: 0, count: data.count)
             data.copyBytes(to: &bytes, count: data.count)
-            self.messages.append(String(data: data, encoding: .utf8)!)
+            let message = Message()
+            message.type = .fromMe
+            message.message = String(data: data, encoding: .utf8)!
+            messages.append(message)
+            
             self.output?.write(bytes, maxLength: data.count)
         }
     }
@@ -106,7 +122,10 @@ class ConnectHandler: NSObject ,StreamDelegate{
                 self.data.append(contentsOf: tmpData[0..<count])
                 if !inStream.hasBytesAvailable{
                     self.dataReceiveClouser(Data(bytes: self.data) , self)
-                    self.messages.append( String(bytes: self.data, encoding: .utf8)!)
+                    let message = Message()
+                    message.type = .fromOther
+                    message.message = String(bytes: self.data, encoding: .utf8)!
+                    self.messages.append(message)
                     self.data.removeAll()
                 }
             }

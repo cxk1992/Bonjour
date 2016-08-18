@@ -106,7 +106,7 @@ class MenuTableViewController: UITableViewController {
         var cell = tableView.dequeueReusableCell(withIdentifier: cellId)
 
         if cell == nil {
-            cell = UITableViewCell(style: .default, reuseIdentifier: cellId)
+            cell = UITableViewCell(style: .value1, reuseIdentifier: cellId)
         }
         
         let handler = dataSource[indexPath.row]
@@ -119,12 +119,23 @@ class MenuTableViewController: UITableViewController {
     
     
     override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+        let handler = dataSource[indexPath.row]
         if status == .search {
-            let handler = dataSource[indexPath.row]
             handler.cennect()
         }
         let sessionController = splitViewController?.viewControllers[1] as! ViewController
-        sessionController.handler = dataSource[indexPath.row]
+        if let abc = sessionController.handler {
+            if abc == handler{
+                return
+            }
+            abc.dataReceiveClouser = {(data : Data, handler : ConnectHandler) in
+                handler.hasNewMessage = true
+                self.tableView.reloadData()
+            }
+        }
+        handler.hasNewMessage = false
+        sessionController.handler = handler
+        self.tableView.reloadData()
     }
 }
 
