@@ -8,18 +8,41 @@
 
 import Foundation
 
+enum BonjourType : String {
+    case bonjour,service ,client
+}
+
 class ConnectHandler: NSObject ,StreamDelegate{
     
-    typealias dataResolveClouser = (data:Data , handler : ConnectHandler) -> ()
+    var type : BonjourType = .bonjour
+    
+    var service : NetService?
+    
+    typealias dataResolveClouser = (_ data:Data , _ handler : ConnectHandler) -> ()
     
     var name = ""
+    
+    var hasNewMessage : Bool = false
     
     override init() {
         super.init()
     }
     
-    convenience init( inputStream : InputStream ,outputStream:NSOutputStream,dataReceiveClouser:dataResolveClouser) {
+    internal
+    func cennect(){
+        self.type = .client
+        
+        var input : InputStream?
+        var output : OutputStream?
+        self.service?.getInputStream(&input, outputStream: &output)
+        
+        self.input = input
+        self.output = output
+    }
+    
+    convenience init( inputStream : InputStream ,outputStream:OutputStream,dataReceiveClouser:dataResolveClouser) {
         self.init()
+        self.type = .service
         self.input = inputStream
         self.output = outputStream
         self.dataReceiveClouser = dataReceiveClouser
@@ -29,12 +52,15 @@ class ConnectHandler: NSObject ,StreamDelegate{
         didSet{
             input?.delegate = self
             input?.schedule(in: .current, forMode: .commonModes)
+            print("\(type) will open")
             if input?.streamStatus == .notOpen{
+                print("\(type) begin open")
+                
                 input?.open()
             }
         }
     }
-    var output:NSOutputStream?{
+    var output:OutputStream?{
         didSet{
             output?.delegate = self
             output?.schedule(in: .current, forMode: .commonModes)
@@ -58,6 +84,7 @@ class ConnectHandler: NSObject ,StreamDelegate{
     }
     
     func stream(_ aStream: Stream, handle eventCode: Stream.Event) {
+        print(type)
         switch eventCode {
         case Stream.Event.openCompleted:
             print("Stream.Event.openCompleted")
@@ -75,7 +102,8 @@ class ConnectHandler: NSObject ,StreamDelegate{
                 let count = inStream.read(&tmpData, maxLength: 1024)
                 self.data.append(contentsOf: tmpData[0..<count])
                 if !inStream.hasBytesAvailable{
-                    self.dataReceiveClouser(data: Data(bytes: self.data) , handler: self)
+                    self.dataReceiveClouser(Data(bytes: self.data) , self)
+                    print(String(bytes: self.data, encoding: .utf8))
                     self.data.removeAll()
                 }
             }
@@ -93,11 +121,13 @@ public let serviceType = "_serviceType._tcp"
 
 class ServerManager:NSObject{
     
-    typealias connectClouser = (handler : ConnectHandler) -> ()
+    typealias connectClouser = (_ handler : ConnectHandler) -> ()
     
     static let defaultManager  = ServerManager()
     
     private let service = NetService(domain: "local.", type: serviceType, name: "cxk_service")
+    
+    var connectCloser : connectClouser?
     
     override init() {
         super.init()
@@ -106,6 +136,9 @@ class ServerManager:NSObject{
     
     func publishService(connectClouser : connectClouser){
         service.publish(options: .listenForConnections)
+        self.connectCloser = connectClouser;
+        
+        self.service.resolve(withTimeout: 5)
     }
     
     func closeService(){
@@ -156,8 +189,15 @@ extension ServerManager : NetServiceDelegate{
     
     
     @available(OSX 10.9, *)
-    public func netService(_ sender: NetService, didAcceptConnectionWith inputStream: InputStream, outputStream: NSOutputStream){
+    public func netService(_ sender: NetService, didAcceptConnectionWith inputStream: InputStream, outputStream: OutputStream){
         print(#function)
+        
+        let handler = ConnectHandler()
+        handler.input = inputStream
+        handler.output = outputStream
+        if let clouser = self.connectCloser{
+            clouser(handler)
+        }
     }
 }
 

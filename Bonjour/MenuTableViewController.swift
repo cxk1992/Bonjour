@@ -16,7 +16,7 @@ enum NetStatus : String {
 
 class MenuTableViewController: UITableViewController {
     
-    var dataSource = []
+    var dataSource : [ConnectHandler] = []
     
     var pulishItem : UIBarButtonItem?
     var searchItem : UIBarButtonItem?
@@ -59,7 +59,13 @@ class MenuTableViewController: UITableViewController {
             searchItem?.isEnabled = false
             item.title = "stop"
             ServerManager.defaultManager.publishService(connectClouser: { (handler) in
-                
+                self.dataSource.append(handler)
+                handler.name = "client"
+                handler.dataReceiveClouser = {(data : Data, handler : ConnectHandler) in
+                    handler.hasNewMessage = true
+                    self.tableView.reloadData()
+                }
+                self.tableView.reloadData()
             })
             status = .publish
             
@@ -67,6 +73,7 @@ class MenuTableViewController: UITableViewController {
             searchItem?.isEnabled = true
             item.title = "发布"
             ServerManager.defaultManager.closeService()
+            self.dataSource.removeAll()
             status = .none
         }
     }
@@ -81,8 +88,9 @@ class MenuTableViewController: UITableViewController {
         }else{
             pulishItem?.isEnabled = true
             item.title = "搜索"
-            status = .none
+            self.dataSource.removeAll()
             serviceBrowser.stop()
+            status = .none
         }
     }
     
@@ -90,7 +98,7 @@ class MenuTableViewController: UITableViewController {
 
     override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         
-        return 5
+        return dataSource.count
     }
 
     let cellId = "cell"
@@ -101,22 +109,22 @@ class MenuTableViewController: UITableViewController {
             cell = UITableViewCell(style: .default, reuseIdentifier: cellId)
         }
         
-        cell?.textLabel?.text = "cell : \(indexPath.row)"
+        let handler = dataSource[indexPath.row]
+        
+        cell?.textLabel?.text = handler.name
+        cell?.detailTextLabel?.text = handler.hasNewMessage ? "new message" : ""
         
         return cell!
     }
     
     
     override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-        let viewController = ViewController()
-        viewController.name = "cell : \(indexPath.row)"
-        let vcs = splitViewController?.viewControllers
-        for idx in 0..<(vcs?.count)!{
-            if vcs?[idx] == navigationController{
-                print("find the menu controller \(idx)")
-            }
+        if status == .search {
+            let handler = dataSource[indexPath.row]
+            handler.cennect()
         }
-        splitViewController?.showDetailViewController(viewController, sender: nil)
+        let sessionController = splitViewController?.viewControllers[1] as! ViewController
+        sessionController.handler = dataSource[indexPath.row]
     }
 }
 
@@ -144,7 +152,15 @@ extension MenuTableViewController : NetServiceBrowserDelegate{
     
     public func netServiceBrowser(_ browser: NetServiceBrowser, didFind service: NetService, moreComing: Bool){
         print(#function)
-        foundService.append(service)
+        let handler = ConnectHandler()
+        handler.service = service;
+        handler.name = service.name
+        handler.dataReceiveClouser = { (data : Data,handler : ConnectHandler) in
+            handler.hasNewMessage = true
+            self.tableView.reloadData()
+        }
+        dataSource.append(handler)
+        self.tableView.reloadData()
     }
     
     
@@ -162,7 +178,7 @@ extension MenuTableViewController : NetServiceBrowserDelegate{
         if index == NSNotFound {
             print("found error")
         }else{
-            foundService.remove(at: index!)
+            
         }
     }
 }
