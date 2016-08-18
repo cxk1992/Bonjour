@@ -24,6 +24,8 @@ class ConnectHandler: NSObject ,StreamDelegate{
     
     var hasNewMessage : Bool = false
     
+    var messages : [String] = []
+    
     override init() {
         super.init()
     }
@@ -79,6 +81,7 @@ class ConnectHandler: NSObject ,StreamDelegate{
         if self.output!.hasSpaceAvailable{
             var bytes : [UInt8] = Array(repeating: 0, count: data.count)
             data.copyBytes(to: &bytes, count: data.count)
+            self.messages.append(String(data: data, encoding: .utf8)!)
             self.output?.write(bytes, maxLength: data.count)
         }
     }
@@ -103,7 +106,7 @@ class ConnectHandler: NSObject ,StreamDelegate{
                 self.data.append(contentsOf: tmpData[0..<count])
                 if !inStream.hasBytesAvailable{
                     self.dataReceiveClouser(Data(bytes: self.data) , self)
-                    print(String(bytes: self.data, encoding: .utf8))
+                    self.messages.append( String(bytes: self.data, encoding: .utf8)!)
                     self.data.removeAll()
                 }
             }

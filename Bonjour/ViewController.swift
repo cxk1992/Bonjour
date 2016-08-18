@@ -17,6 +17,8 @@ class ViewController: UIViewController , UITextFieldDelegate {
                 self.dataSource.append(message!)
                 self.tableView.reloadData()
             }
+            self.dataSource = (handler?.messages)!
+            self.tableView.reloadData()
         }
     }
     
